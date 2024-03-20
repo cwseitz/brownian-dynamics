@@ -9,7 +9,7 @@ from utils import *
 with open('plot_msd.json', 'r') as f:
     config = json.load(f)
     
-#imsd(config)
+imsd(config)
 plot_imsd(config,multiplier=1e12)
 
 
