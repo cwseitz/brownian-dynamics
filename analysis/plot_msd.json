@@ -1,0 +1,9 @@
+{
+"path": "/research2/shared/cwseitz/Data/MD/",
+"mpp": 1,
+"fps": 1,
+"max_lag": 100,
+"tburn": 9000,
+"timestep":1e-4,
+"num_atoms": 100
+}
