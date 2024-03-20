@@ -1,0 +1,24 @@
+###############################################
+# LAMMPS script 
+###############################################
+
+units si
+atom_style angle
+
+variable T equal TEMPERATURE
+variable cutoff equal CUTOFF
+
+boundary p p p
+neighbor NEIGHBOR bin 
+neigh_modify every 1 delay 1 check yes 
+read_data _lammps/initialize/init_brownian.txt 
+reset_timestep 0 
+group all type 1 2 3 4
+dump mydump all custom 1 DUMPNAME id type xu yu zu
+
+variable seed equal 54654651
+fix 1 all brownian   ${T} ${seed} gamma_t GAMMA
+timestep TIMESTEP
+
+run NSTEPS
+

@@ -1,0 +1,14 @@
+{
+"savepath": "/research2/shared/cwseitz/Data/MD/",
+"T": 310,
+"sigma": 150e-9,
+"cutoff": 200e-9,
+"kappa": 90.0,
+"neighbor": 300e-9,
+"gamma": 1e-7,
+"timestep": 1e-4,
+"nsteps": 10000,
+"dump_every": 1,
+"boxhw": 2e-6,
+"num_atoms_per_polymer": 80
+}

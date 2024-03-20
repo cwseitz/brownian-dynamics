@@ -2,8 +2,8 @@
 # LAMMPS script 
 ###############################################
 
-units si           # use SI units
-atom_style angle     # atoms with bonds and angles
+units si
+atom_style angle
 
 variable        kB_T equal 4.2800119e-21 #J
 variable        sigma equal 150e-9
@@ -15,7 +15,7 @@ variable        K equal 0.0
 boundary p p p
 neighbor 300e-9 bin 
 neigh_modify every 1 delay 1 check yes 
-read_data initial_configuration.txt 
+read_data init_rouse.txt 
 reset_timestep 0 
 group all type 1 2 3 4
 dump mydump all custom 1 dump.DNA id type xu yu zu
@@ -24,7 +24,7 @@ dump mydump all custom 1 dump.DNA id type xu yu zu
 bond_style   harmonic 
 bond_coeff   1   ${K}   ${sigma}
 variable seed equal 54654651
-fix 1 all brownian   ${T} ${seed} gamma_t 1e-7  #brownian dynamics
+fix 1 all brownian   ${T} ${seed} gamma_t GAMMA
 timestep 1e-4
 
 #Gaussian potentials

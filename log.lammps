@@ -5,39 +5,36 @@ OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/src/comm.cp
 # LAMMPS script
 ###############################################
 
-units si           # use SI units
-atom_style angle     # atoms with bonds and angles
+units si
+atom_style angle
 
-variable        kB_T equal 4.2800119e-21 #J
-variable        sigma equal 150e-9
-variable        T equal 310    #37C
-variable        cutoff equal 200e-9 # sigma units
-#variable        K equal 90.0*${kB_T}/${sigma}^2
-variable        K equal 0.0
-variable        E_soft equal 0.00*${kB_T}
-variable        E_soft equal 0.00*4.2800119e-21
-variable        E_soft_2 equal 0.00*${kB_T}
-variable        E_soft_2 equal 0.00*4.2800119e-21
+variable        kb equal 1.38e-23
+variable        T0 equal 310
+variable        T equal 310
+variable        sigma equal 1.5e-07
+variable        cutoff equal 2e-07
+variable        K equal 90.0*${kb}*${T0}/${sigma}^2
+variable        K equal 90.0*1.38e-23*${T0}/${sigma}^2
+variable        K equal 90.0*1.38e-23*310/${sigma}^2
+variable        K equal 90.0*1.38e-23*310/1.5e-07^2
 
 boundary p p p
-
-neighbor 300e-9 bin
+neighbor 3e-07 bin
 neigh_modify every 1 delay 1 check yes
-
-read_data initial_configuration.txt
+read_data _lammps/initialize/init_rouse.txt
 Reading data file ...
   orthogonal box = (-2e-06 -2e-06 -2e-06) to (2e-06 2e-06 2e-06)
   1 by 1 by 1 MPI processor grid
   reading atoms ...
-  320 atoms
+  80 atoms
   scanning bonds ...
   1 = max bonds/atom
   scanning angles ...
   1 = max angles/atom
   reading bonds ...
-  312 bonds
+  78 bonds
   reading angles ...
-  312 angles
+  78 angles
 Finding 1-2 1-3 1-4 neighbors ...
   special bond factors lj:    0        0        0       
   special bond factors coul:  0        0        0       
@@ -45,167 +42,95 @@ Finding 1-2 1-3 1-4 neighbors ...
      2 = max # of 1-3 neighbors
      4 = max # of 1-4 neighbors
      6 = max # of special neighbors
-  special bonds CPU = 0.001 seconds
-  read_data CPU = 0.010 seconds
+  special bonds CPU = 0.000 seconds
+  read_data CPU = 0.090 seconds
 reset_timestep 0
-
 group all type 1 2 3 4
-320 atoms in group all
+80 atoms in group all
+dump mydump all custom 1 /research2/shared/cwseitz/Data/MD/dump_310.DNA id type xu yu zu
 
-dump mydump all custom 1 /research2/shared/cwseitz/Data/MD/dump_100_0_0_310-9.DNA id type xu yu zu
-
-#Between bonded atoms
+#Harmonic bonds
 bond_style   harmonic
 bond_coeff   1   ${K}   ${sigma}
-bond_coeff   1   0   ${sigma}
-bond_coeff   1   0   1.5e-07
-
-#Between non-bonded atoms (last value is global soft cutoff)
-#pair_style     soft ${cutoff}
-
-#pair_coeff 1 1  ${E_soft} ${cutoff}
-#pair_coeff 1 2  ${E_soft} ${cutoff}
-#pair_coeff 1 3  ${E_soft_2} ${cutoff}
-#pair_coeff 2 2  ${E_soft} ${cutoff}
-#pair_coeff 2 3  ${E_soft_2} ${cutoff}
-#pair_coeff 3 3  ${E_soft_2} ${cutoff}
-#pair_coeff 1 4  ${E_soft_2} ${cutoff}
-#pair_coeff 2 4  ${E_soft_2} ${cutoff}
-#pair_coeff 3 4  ${E_soft_2} ${cutoff}
-#pair_coeff 4 4  ${E_soft_2} ${cutoff}
-
-
+bond_coeff   1   1.7112e-05   ${sigma}
+bond_coeff   1   1.7112e-05   1.5e-07
 variable seed equal 54654651
-fix 1 all brownian   ${T} ${seed} gamma_t 1e-7  #brownian dynamics
-fix 1 all brownian   310 ${seed} gamma_t 1e-7  
-fix 1 all brownian   310 54654651 gamma_t 1e-7  
-
-timestep 1e-4
-
-#Equilibrate with soft potentials
-
-#run 5000
-
-#write_restart DNA.equlilb.restart
-#Switch to Gaussian potential
-
-pair_style table linear 1000
-pair_coeff 1 1 gauss.table GAUSS1 ${cutoff}
-pair_coeff 1 1 gauss.table GAUSS1 2e-07
-pair_coeff 1 2 gauss.table GAUSS1 ${cutoff}
-pair_coeff 1 2 gauss.table GAUSS1 2e-07
-pair_coeff 1 3 gauss.table GAUSS0 ${cutoff}
-pair_coeff 1 3 gauss.table GAUSS0 2e-07
-pair_coeff 2 2 gauss.table GAUSS1 ${cutoff}
-pair_coeff 2 2 gauss.table GAUSS1 2e-07
-pair_coeff 2 3 gauss.table GAUSS2 ${cutoff}
-pair_coeff 2 3 gauss.table GAUSS2 2e-07
-WARNING: 2 of 1000 force values in table GAUSS2 are inconsistent with -dE/dr.
-WARNING:  Should only be flagged at inflection points (src/src/pair_table.cpp:466)
-pair_coeff 3 3 gauss.table GAUSS0 ${cutoff}
-pair_coeff 3 3 gauss.table GAUSS0 2e-07
-pair_coeff 1 4 gauss.table GAUSS0 ${cutoff}
-pair_coeff 1 4 gauss.table GAUSS0 2e-07
-pair_coeff 2 4 gauss.table GAUSS4 ${cutoff}
-pair_coeff 2 4 gauss.table GAUSS4 2e-07
-WARNING: 2 of 1000 force values in table GAUSS4 are inconsistent with -dE/dr.
-WARNING:  Should only be flagged at inflection points (src/src/pair_table.cpp:466)
-pair_coeff 3 4 gauss.table GAUSS0 ${cutoff}
-pair_coeff 3 4 gauss.table GAUSS0 2e-07
-pair_coeff 4 4 gauss.table GAUSS3 ${cutoff}
-pair_coeff 4 4 gauss.table GAUSS3 2e-07
-WARNING: 2 of 1000 force values in table GAUSS3 are inconsistent with -dE/dr.
-WARNING:  Should only be flagged at inflection points (src/src/pair_table.cpp:466)
-
+fix 1 all brownian   ${T} ${seed} gamma_t 1e-07
+fix 1 all brownian   310 ${seed} gamma_t 1e-07
+fix 1 all brownian   310 54654651 gamma_t 1e-07
+timestep 0.0001
 
 run 10000
-Generated 0 of 6 mixed pair_coeff terms from geometric mixing rule
 WARNING: Angles are defined but no angle style is set (src/src/force.cpp:198)
 WARNING: Likewise 1-3 special neighbor interactions != 1.0 (src/src/force.cpp:200)
-WARNING: Communication cutoff 5e-07 is shorter than a bond length based estimate of 5.25e-07. This may lead to errors. (src/src/comm.cpp:723)
-Neighbor list info ...
-  update: every = 1 steps, delay = 1 steps, check = yes
-  max neighbors/atom: 2000, page size: 100000
-  master list distance cutoff = 5e-07
-  ghost atom cutoff = 5e-07
-  binsize = 2.5e-07, bins = 16 16 16
-  1 neighbor lists, perpetual/occasional/extra = 1 0 0
-  (1) pair table, perpetual
-      attributes: half, newton on
-      pair build: half/bin/newton
-      stencil: half/bin/3d
-      bin: standard
-WARNING: Communication cutoff 5e-07 is shorter than a bond length based estimate of 5.25e-07. This may lead to errors. (src/src/comm.cpp:723)
-Per MPI rank memory allocation (min/avg/max) = 5.251 | 5.251 | 5.251 Mbytes
-   Step          Temp          E_pair         E_mol          TotEng         Press     
-         0   0              0              0              0              0            
-     10000   6.1412793e+13  0              0              4.0571822e-07  4.2262315e+09
+WARNING: No pairwise cutoff or binsize set. Atom sorting therefore disabled. (src/src/atom.cpp:2366)
+WARNING: Inconsistent image flags (src/src/domain.cpp:815)
 WARNING: Bond/angle/dihedral extent > half of periodic box length (src/src/domain.cpp:936)
-Loop time of 10.2027 on 1 procs for 10000 steps with 320 atoms
+Per MPI rank memory allocation (min/avg/max) = 4.428 | 4.428 | 4.428 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+         0   0              0              6.5543519e-15  6.5543519e-15 -72.534119    
+     10000   6.7724068e+13  0              2.5204398e-19  1.1080137e-07  1.1541809e+09
+Loop time of 2.38589 on 1 procs for 10000 steps with 80 atoms
 
-95.8% CPU use with 1 MPI tasks x 1 OpenMP threads
+93.1% CPU use with 1 MPI tasks x 1 OpenMP threads
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
 ---------------------------------------------------------------
-Pair    | 1.3883     | 1.3883     | 1.3883     |   0.0 | 13.61
-Bond    | 0.080399   | 0.080399   | 0.080399   |   0.0 |  0.79
-Neigh   | 0.042971   | 0.042971   | 0.042971   |   0.0 |  0.42
-Comm    | 0.02983    | 0.02983    | 0.02983    |   0.0 |  0.29
-Output  | 8.2808     | 8.2808     | 8.2808     |   0.0 | 81.16
-Modify  | 0.30348    | 0.30348    | 0.30348    |   0.0 |  2.97
-Other   |            | 0.0769     |            |       |  0.75
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Bond    | 0.034094   | 0.034094   | 0.034094   |   0.0 |  1.43
+Neigh   | 0.00052868 | 0.00052868 | 0.00052868 |   0.0 |  0.02
+Comm    | 0.034188   | 0.034188   | 0.034188   |   0.0 |  1.43
+Output  | 2.1519     | 2.1519     | 2.1519     |   0.0 | 90.19
+Modify  | 0.099878   | 0.099878   | 0.099878   |   0.0 |  4.19
+Other   |            | 0.06526    |            |       |  2.74
 
-Nlocal:            320 ave         320 max         320 min
+Nlocal:             80 ave          80 max          80 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Nghost:              0 ave           0 max           0 min
+Nghost:             26 ave          26 max          26 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Neighs:           8198 ave        8198 max        8198 min
+Neighs:              0 ave           0 max           0 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 
-Total # of neighbors = 8198
-Ave neighs/atom = 25.61875
+Total # of neighbors = 0
+Ave neighs/atom = 0
 Ave special neighs/atom = 5.775
-Neighbor list builds = 57
-Dangerous builds = 0
-#write_restart final.restart
+Neighbor list builds = 83
+Dangerous builds = 10
 
 run 1
-Generated 0 of 6 mixed pair_coeff terms from geometric mixing rule
 WARNING: Angles are defined but no angle style is set (src/src/force.cpp:198)
 WARNING: Likewise 1-3 special neighbor interactions != 1.0 (src/src/force.cpp:200)
-WARNING: Communication cutoff 5e-07 is shorter than a bond length based estimate of 5.25e-07. This may lead to errors. (src/src/comm.cpp:723)
-WARNING: Bond/angle/dihedral extent > half of periodic box length (src/src/domain.cpp:936)
-Per MPI rank memory allocation (min/avg/max) = 6.513 | 6.513 | 6.513 Mbytes
+WARNING: Inconsistent image flags (src/src/domain.cpp:815)
+Per MPI rank memory allocation (min/avg/max) = 5.681 | 5.681 | 5.681 Mbytes
    Step          Temp          E_pair         E_mol          TotEng         Press     
-     10000   6.1412793e+13  0              0              4.0571822e-07  4.2262315e+09
-     10001   6.0795585e+13  0              0              4.0164069e-07  4.1837572e+09
-WARNING: Bond/angle/dihedral extent > half of periodic box length (src/src/domain.cpp:936)
-Loop time of 0.00102475 on 1 procs for 1 steps with 320 atoms
+     10000   6.7724068e+13  0              2.5204398e-19  1.1080137e-07  1.1541809e+09
+     10001   6.9145946e+13  0              2.5032062e-19  1.1312766e-07  1.1784131e+09
+Loop time of 0.000282013 on 1 procs for 1 steps with 80 atoms
 
-97.2% CPU use with 1 MPI tasks x 1 OpenMP threads
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
 ---------------------------------------------------------------
-Pair    | 9.6395e-05 | 9.6395e-05 | 9.6395e-05 |   0.0 |  9.41
-Bond    | 1.2179e-05 | 1.2179e-05 | 1.2179e-05 |   0.0 |  1.19
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Bond    | 4.657e-06  | 4.657e-06  | 4.657e-06  |   0.0 |  1.65
 Neigh   | 0          | 0          | 0          |   0.0 |  0.00
-Comm    | 3.121e-06  | 3.121e-06  | 3.121e-06  |   0.0 |  0.30
-Output  | 0.00086583 | 0.00086583 | 0.00086583 |   0.0 | 84.49
-Modify  | 3.4105e-05 | 3.4105e-05 | 3.4105e-05 |   0.0 |  3.33
-Other   |            | 1.312e-05  |            |       |  1.28
+Comm    | 3.879e-06  | 3.879e-06  | 3.879e-06  |   0.0 |  1.38
+Output  | 0.00025005 | 0.00025005 | 0.00025005 |   0.0 | 88.67
+Modify  | 1.1807e-05 | 1.1807e-05 | 1.1807e-05 |   0.0 |  4.19
+Other   |            | 1.162e-05  |            |       |  4.12
 
-Nlocal:            320 ave         320 max         320 min
+Nlocal:             80 ave          80 max          80 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Nghost:              0 ave           0 max           0 min
+Nghost:             26 ave          26 max          26 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Neighs:           8204 ave        8204 max        8204 min
+Neighs:              0 ave           0 max           0 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 
-Total # of neighbors = 8204
-Ave neighs/atom = 25.6375
+Total # of neighbors = 0
+Ave neighs/atom = 0
 Ave special neighs/atom = 5.775
 Neighbor list builds = 0
 Dangerous builds = 0
-Total wall time: 0:00:10
+Total wall time: 0:00:02
