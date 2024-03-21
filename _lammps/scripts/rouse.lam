@@ -19,7 +19,7 @@ read_data _lammps/initialize/init_rouse.txt
 reset_timestep 0 
 group all type 1 2 3 4
 dump dump1 all custom EVERY DUMPNAME id type xu yu zu
-dump dump2 all custom EVERY SCALED_WRAPPED id type xs ys zs
+dump dump2 all custom EVERY SCALED_WRAPPED id type xsu ysu zsu
 
 #Harmonic bonds
 bond_style   harmonic 

@@ -2,14 +2,15 @@
 "savepath": "/research3/shared/cwseitz/Data/MD/",
 "nreps": 2,
 "T": 310,
-"sigma": 150e-9,
+"sigma": 200e-9,
 "cutoff": 500e-9,
-"kappa": 90.0,
+"kappa": 1000.0,
 "neighbor": 500e-9,
 "gamma": 1e-7,
 "timestep": 1e-4,
 "nsteps": 10000,
 "dump_every": 1,
-"boxhw": 2e-6,
-"num_atoms_per_polymer": 80
+"boxhw": 1e-5,
+"num_atoms_per_polymer": 80,
+"polymer_scale": 200e-9
 }

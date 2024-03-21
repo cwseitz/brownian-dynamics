@@ -1,5 +1,6 @@
 from lammps import IPyLammps
 from .initialize import rouse, brownian
+import matplotlib.pyplot as plt
 import os
 
 class Brownian:
@@ -50,12 +51,13 @@ class Rouse:
         self.config = config
         self.file = '_lammps/scripts/rouse.lam'
         self.initialize()
-    def initialize(self):
+    def initialize(self,ax=None):
         config = self.config
+        #ax = plt.figure().add_subplot(projection='3d')
         with open("_lammps/initialize/init_rouse.txt", "w") as f:
-            f = rouse.initialize_rouse(f,self.config) 
-    def scale(self,dump_file):
-        new_bounds = "-1.0 1.0"
+            f = rouse.initialize_rouse(f,self.config,ax=ax) 
+    def scale(self,dump_file,lheader=9):
+        new_bounds = "0.0 1.0"
         with open(dump_file, 'r') as file:
             lines = file.readlines()
         for i, line in enumerate(lines):
@@ -89,6 +91,6 @@ class Rouse:
                 lmp.file(temp); lmp.run(1)
                 lmp.close(); os.remove(temp)
                 self.scale(sdump_name)
-
+                
 
 

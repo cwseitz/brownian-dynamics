@@ -42,12 +42,13 @@ def write_header(f,num_atoms_per_polymer,boxhw):
     f.write('1 1\n')
     return f
     
-def write_atoms(f,num_atoms_per_polymer,ax=None,sigma=1.0):
+def write_atoms(f,num_atoms_per_polymer,scale,ax=None):
     f.write("\n")
     f.write("Atoms\n")
     f.write("\n")    
     atom_id = 1
-    polymer_positions = generate_polymer(0.0,num_atoms_per_polymer,sigma=sigma)
+    polymer_positions = generate_polymer(0.0,num_atoms_per_polymer)
+    polymer_positions *= scale
     if ax is not None:
         plot_polymer(polymer_positions,ax)
     for pos in polymer_positions:
@@ -80,9 +81,9 @@ def write_angles(f,num_atoms_per_polymer):
         angle_id += 1  
     return f  
              
-def initialize_rouse(f,config):
+def initialize_rouse(f,config,ax=None):
     f = write_header(f,config['num_atoms_per_polymer'],config['boxhw'])
-    f = write_atoms(f,config['num_atoms_per_polymer'])
+    f = write_atoms(f,config['num_atoms_per_polymer'],config['polymer_scale'],ax=ax)
     f = write_bonds(f,config['num_atoms_per_polymer'])
     f = write_angles(f,config['num_atoms_per_polymer'])   
     
