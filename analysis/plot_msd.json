@@ -5,5 +5,5 @@
 "max_lag": 50,
 "tburn": 9000,
 "timestep":1e-4,
-"num_atoms": 80
+"num_atoms": 1200
 }

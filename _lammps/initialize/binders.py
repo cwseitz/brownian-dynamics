@@ -11,32 +11,34 @@ def plot_polymer(pos, ax):
                 color='black',alpha=0.3)
     plt.show()
 
-def generate_polymer(center,num_atoms_per_polymer,sigma=1.0):
+def generate_polymer(center, num_atoms_per_polymer, R=0.5, sigma=0.1):
     positions = np.zeros((num_atoms_per_polymer, 3))
     displacements = np.random.normal(scale=sigma, size=(num_atoms_per_polymer, 3))
-    magnitudes = np.linalg.norm(displacements, axis=1)
-    displacements = (displacements.T / magnitudes * sigma).T
     for i in range(1, num_atoms_per_polymer):
-        positions[i] = displacements[i]
+        new_position = displacements[i] + positions[i-1]
+        r = np.linalg.norm(new_position)
+        if r > R:
+            displacements[i] *= -1
+            new_position = displacements[i] + positions[i-1]
+        positions[i] = new_position
     positions += center
     return positions
 
-def write_header(f,num_atoms_per_polymer,num_polymers,num_brd4,num_pbrd4,
-             xlo,xhi,ylo,yhi,zlo,zhi):
+def write_header(f,num_atoms_per_polymer,num_c,num_d,boxhw):
 
     f.write("# LAMMPS configuration file\n")
     f.write("\n")
-    f.write(f'{num_atoms_per_polymer*num_polymers + num_brd4 + num_pbrd4} atoms\n')
-    f.write(f'{(num_atoms_per_polymer-2)*num_polymers} bonds\n')
-    f.write(f'{(num_atoms_per_polymer-2)*num_polymers} angles\n')
+    f.write(f'{num_atoms_per_polymer + num_c + num_d} atoms\n')
+    f.write(f'{(num_atoms_per_polymer-2)} bonds\n')
+    f.write(f'{(num_atoms_per_polymer-2)} angles\n')
     f.write("\n")
     f.write('4 atom types\n')
     f.write('1 bond types\n')
     f.write('1 angle types\n')
     f.write("\n")
-    f.write(f"{xlo} {xhi} xlo xhi\n")
-    f.write(f"{ylo} {yhi} ylo yhi\n")
-    f.write(f"{zlo} {zhi} zlo zhi\n")
+    f.write(f"{-boxhw} {boxhw} xlo xhi\n")
+    f.write(f"{-boxhw} {boxhw} ylo yhi\n")
+    f.write(f"{-boxhw} {boxhw} zlo zhi\n")
     f.write("\n")
     f.write('Masses\n')
     f.write("\n")
@@ -46,61 +48,68 @@ def write_header(f,num_atoms_per_polymer,num_polymers,num_brd4,num_pbrd4,
     f.write('4 1\n')
     return f
     
-def write_atoms(f,centers,num_brd4,num_pbrd4,num_polymers,num_atoms_per_polymer,
-                boxhw_brd4=10.0,ax=None,sigma=1.0,p_acetyl=0.2):
+def write_atoms(f,num_c,num_d,num_atoms_per_polymer,scale,
+                boxhw=1.0,boxhw_binders=1.0,ax=None,p_acetyl=0.2):
     f.write("\n")
     f.write("Atoms\n")
     f.write("\n")    
     atom_id = 1
-    for polymer_id in range(num_polymers):
-        polymer_positions = generate_polymer(centers[polymer_id],num_atoms_per_polymer,sigma=sigma)
-        if ax is not None:
-            plot_polymer(polymer_positions,ax)
-        for pos in polymer_positions:
-            ptype = 1
-            if np.random.uniform(0,1) < p_acetyl:
-                ptype = 2
-            f.write(f"{atom_id} {polymer_id + 1} {ptype} {pos[0]} {pos[1]} {pos[2]}\n")
-            atom_id += 1
-    for n in range(num_brd4):
-        r = np.random.uniform(-boxhw_brd4,boxhw_brd4,size=(3,))
-        f.write(f"{atom_id} {num_polymers + n + 1} 3 {r[0]} {r[1]} {r[2]}\n")
+    center = [boxhw,boxhw,boxhw]
+    polymer_positions = generate_polymer(center,num_atoms_per_polymer)
+    polymer_positions *= scale
+    if ax is not None:
+        plot_polymer(polymer_positions,ax)
+    for pos in polymer_positions:
+        ptype = 1
+        if np.random.uniform(0,1) < p_acetyl:
+            ptype = 2
+        f.write(f"{atom_id} {1} {ptype} {pos[0]} {pos[1]} {pos[2]}\n")
         atom_id += 1
-    for n in range(num_pbrd4):
-        r = np.random.uniform(-boxhw_brd4,boxhw_brd4,size=(3,))
-        f.write(f"{atom_id} {num_polymers + n + 1} 4 {r[0]} {r[1]} {r[2]}\n")
+    for n in range(num_c):
+        r = np.random.uniform(-boxhw_binders,boxhw_binders,size=(3,))
+        f.write(f"{atom_id} {n + 2} 3 {r[0]} {r[1]} {r[2]}\n")
+        atom_id += 1
+    for n in range(num_d):
+        r = np.random.uniform(-boxhw_binders,boxhw_binders,size=(3,))
+        f.write(f"{atom_id} {n + 2} 4 {r[0]} {r[1]} {r[2]}\n")
         atom_id += 1
     plt.show()
     return f
             
-def write_bonds(f,num_polymers,num_atoms_per_polymer):
+def write_bonds(f,num_atoms_per_polymer):
     f.write("\n")
     f.write("Bonds\n")
     f.write("\n")    
     bond_id = 1
-    for polymer_id in range(num_polymers):
-        start = polymer_id*num_atoms_per_polymer + 1
-        stop = polymer_id*num_atoms_per_polymer + num_atoms_per_polymer - 1
-        for n in range(start,stop):
-            line = f"{bond_id} 1 {n} {n+1}\n"
-            f.write(line)
-            bond_id += 1
+    start = 1; stop = num_atoms_per_polymer - 1
+    for n in range(start,stop):
+        line = f"{bond_id} 1 {n} {n+1}\n"
+        f.write(line)
+        bond_id += 1
     return f
     
-def write_angles(f,num_polymers,num_atoms_per_polymer):
+def write_angles(f,num_atoms_per_polymer):
     f.write("\n")
     f.write("Angles\n")
     f.write("\n")
-
     angle_id = 1
-    for polymer_id in range(num_polymers):
-        start = polymer_id*num_atoms_per_polymer + 1
-        stop = polymer_id*num_atoms_per_polymer + num_atoms_per_polymer - 1
-        for n in range(start,stop):
-            line = f"{angle_id} 1 {n} {n+1} {n+2}\n"
-            f.write(line)
-            angle_id += 1  
+    start = 1; stop = num_atoms_per_polymer - 1
+    for n in range(start,stop):
+        line = f"{angle_id} 1 {n} {n+1} {n+2}\n"
+        f.write(line)
+        angle_id += 1  
     return f  
              
-
+def initialize_binders(f,config,ax=None):
+    f = write_header(f,config['num_atoms_per_polymer'],
+                     config['num_c'],config['num_d'],config['boxhw'])
+    f = write_atoms(f,config['num_c'],config['num_d'],
+                      config['num_atoms_per_polymer'],
+                      config['polymer_scale'],
+                      boxhw=config['boxhw'],
+                      boxhw_binders=config['boxhw_binders'],
+                      p_acetyl=config['p_acetyl'],ax=ax)
+    f = write_bonds(f,config['num_atoms_per_polymer'])
+    f = write_angles(f,config['num_atoms_per_polymer'])   
+    
     

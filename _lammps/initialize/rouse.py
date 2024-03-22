@@ -15,9 +15,8 @@ def generate_polymer(center,num_atoms_per_polymer,sigma=1.0):
     positions = np.zeros((num_atoms_per_polymer, 3))
     displacements = np.random.normal(scale=sigma, size=(num_atoms_per_polymer, 3))
     magnitudes = np.linalg.norm(displacements, axis=1)
-    displacements = (displacements.T / magnitudes * sigma).T
     for i in range(1, num_atoms_per_polymer):
-        positions[i] = displacements[i]
+        positions[i] = displacements[i] + positions[i-1]
     positions += center
     return positions
 

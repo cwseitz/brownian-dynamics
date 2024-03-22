@@ -12,29 +12,29 @@ variable        kb equal 1.38e-23
 variable        T0 equal 310
 variable        T equal 310
 variable        sigma equal 2e-07
-variable        cutoff equal 5e-07
-variable        K equal 1000.0*${kb}*${T0}/${sigma}^2
-variable        K equal 1000.0*1.38e-23*${T0}/${sigma}^2
-variable        K equal 1000.0*1.38e-23*310/${sigma}^2
-variable        K equal 1000.0*1.38e-23*310/2e-07^2
+variable        cutoff equal 2e-07
+variable        K equal 90.0*${kb}*${T0}/${sigma}^2
+variable        K equal 90.0*1.38e-23*${T0}/${sigma}^2
+variable        K equal 90.0*1.38e-23*310/${sigma}^2
+variable        K equal 90.0*1.38e-23*310/2e-07^2
 
 boundary p p p
 neighbor 5e-07 bin
 neigh_modify every 1 delay 1 check yes
-read_data _lammps/initialize/init_rouse.txt
+read_data _lammps/initialize/init_binders.txt
 Reading data file ...
   orthogonal box = (-1e-05 -1e-05 -1e-05) to (1e-05 1e-05 1e-05)
   1 by 1 by 1 MPI processor grid
   reading atoms ...
-  80 atoms
+  1200 atoms
   scanning bonds ...
   1 = max bonds/atom
   scanning angles ...
   1 = max angles/atom
   reading bonds ...
-  78 bonds
+  198 bonds
   reading angles ...
-  78 angles
+  198 angles
 Finding 1-2 1-3 1-4 neighbors ...
   special bond factors lj:    0        0        0       
   special bond factors coul:  0        0        0       
@@ -43,18 +43,50 @@ Finding 1-2 1-3 1-4 neighbors ...
      4 = max # of 1-4 neighbors
      6 = max # of special neighbors
   special bonds CPU = 0.000 seconds
-  read_data CPU = 0.004 seconds
+  read_data CPU = 0.014 seconds
 reset_timestep 0
 group all type 1 2 3 4
-80 atoms in group all
-dump dump1 all custom 1 /research3/shared/cwseitz/Data/MD/dump_310-1.DNA id type xu yu zu
-dump dump2 all custom 1 /research3/shared/cwseitz/Data/MD/dump_scaled_310-1.DNA id type xsu ysu zsu
+1200 atoms in group all
+dump dump1 all custom 1 /research3/shared/cwseitz/Data/MD/dump_310-4.DNA id type xu yu zu
+dump dump2 all custom 1 /research3/shared/cwseitz/Data/MD/dump_scaled_310-4.DNA id type xsu ysu zsu
 
 #Harmonic bonds
 bond_style   harmonic
 bond_coeff   1   ${K}   ${sigma}
-bond_coeff   1   0.00010695   ${sigma}
-bond_coeff   1   0.00010695   2e-07
+bond_coeff   1   9.6255e-06   ${sigma}
+bond_coeff   1   9.6255e-06   2e-07
+
+#Gaussian potentials
+pair_style table linear 1000
+pair_coeff 1 1 _lammps/potentials/gauss.table GAUSS0 ${cutoff}
+pair_coeff 1 1 _lammps/potentials/gauss.table GAUSS0 2e-07
+pair_coeff 1 2 _lammps/potentials/gauss.table GAUSS0 ${cutoff}
+pair_coeff 1 2 _lammps/potentials/gauss.table GAUSS0 2e-07
+pair_coeff 1 3 _lammps/potentials/gauss.table GAUSS0 ${cutoff}
+pair_coeff 1 3 _lammps/potentials/gauss.table GAUSS0 2e-07
+pair_coeff 2 2 _lammps/potentials/gauss.table GAUSS1 ${cutoff}
+pair_coeff 2 2 _lammps/potentials/gauss.table GAUSS1 2e-07
+pair_coeff 2 3 _lammps/potentials/gauss.table GAUSS2 ${cutoff}
+pair_coeff 2 3 _lammps/potentials/gauss.table GAUSS2 2e-07
+WARNING: 2 of 1000 force values in table GAUSS2 are inconsistent with -dE/dr.
+WARNING:  Should only be flagged at inflection points (src/src/pair_table.cpp:466)
+pair_coeff 3 3 _lammps/potentials/gauss.table GAUSS3 ${cutoff}
+pair_coeff 3 3 _lammps/potentials/gauss.table GAUSS3 2e-07
+WARNING: 2 of 1000 force values in table GAUSS3 are inconsistent with -dE/dr.
+WARNING:  Should only be flagged at inflection points (src/src/pair_table.cpp:466)
+pair_coeff 1 4 _lammps/potentials/gauss.table GAUSS0 ${cutoff}
+pair_coeff 1 4 _lammps/potentials/gauss.table GAUSS0 2e-07
+pair_coeff 2 4 _lammps/potentials/gauss.table GAUSS4 ${cutoff}
+pair_coeff 2 4 _lammps/potentials/gauss.table GAUSS4 2e-07
+WARNING: 2 of 1000 force values in table GAUSS4 are inconsistent with -dE/dr.
+WARNING:  Should only be flagged at inflection points (src/src/pair_table.cpp:466)
+pair_coeff 3 4 _lammps/potentials/gauss.table GAUSS0 ${cutoff}
+pair_coeff 3 4 _lammps/potentials/gauss.table GAUSS0 2e-07
+pair_coeff 4 4 _lammps/potentials/gauss.table GAUSS3 ${cutoff}
+pair_coeff 4 4 _lammps/potentials/gauss.table GAUSS3 2e-07
+WARNING: 2 of 1000 force values in table GAUSS3 are inconsistent with -dE/dr.
+WARNING:  Should only be flagged at inflection points (src/src/pair_table.cpp:466)
+
 variable seed equal 54654651
 fix 1 all brownian   ${T} ${seed} gamma_t 1e-07
 fix 1 all brownian   310 ${seed} gamma_t 1e-07
@@ -62,73 +94,92 @@ fix 1 all brownian   310 54654651 gamma_t 1e-07
 timestep 0.0001
 
 run 10000
+Generated 0 of 6 mixed pair_coeff terms from geometric mixing rule
 WARNING: Angles are defined but no angle style is set (src/src/force.cpp:198)
 WARNING: Likewise 1-3 special neighbor interactions != 1.0 (src/src/force.cpp:200)
-WARNING: No pairwise cutoff or binsize set. Atom sorting therefore disabled. (src/src/atom.cpp:2366)
-Per MPI rank memory allocation (min/avg/max) = 4.428 | 4.428 | 4.428 Mbytes
+WARNING: Communication cutoff 7e-07 is shorter than a bond length based estimate of 8e-07. This may lead to errors. (src/src/comm.cpp:723)
+Neighbor list info ...
+  update: every = 1 steps, delay = 1 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 7e-07
+  ghost atom cutoff = 7e-07
+  binsize = 3.5e-07, bins = 58 58 58
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair table, perpetual
+      attributes: half, newton on
+      pair build: half/bin/newton
+      stencil: half/bin/3d
+      bin: standard
+WARNING: Communication cutoff 7e-07 is shorter than a bond length based estimate of 8e-07. This may lead to errors. (src/src/comm.cpp:723)
+Per MPI rank memory allocation (min/avg/max) = 6.162 | 6.162 | 6.162 Mbytes
    Step          Temp          E_pair         E_mol          TotEng         Press     
-         0   0              0              9.3962547e-17  9.3962547e-17 -0.016574018  
-     10000   7.0658598e+13  0              2.4331591e-19  1.1560246e-07  9633538.7    
-Loop time of 4.30339 on 1 procs for 10000 steps with 80 atoms
+         0   0             -2.1581806e-54  4.880432e-17   4.880432e-17  -0.0071383592 
+     10000   6.2730683e+13 -5.7131304e-55  4.1660186e-19  1.5576654e-06  1.2980545e+08
+Loop time of 63.7352 on 1 procs for 10000 steps with 1200 atoms
 
-92.9% CPU use with 1 MPI tasks x 1 OpenMP threads
+98.0% CPU use with 1 MPI tasks x 1 OpenMP threads
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
 ---------------------------------------------------------------
-Pair    | 0          | 0          | 0          |   0.0 |  0.00
-Bond    | 0.03372    | 0.03372    | 0.03372    |   0.0 |  0.78
-Neigh   | 9.0264e-05 | 9.0264e-05 | 9.0264e-05 |   0.0 |  0.00
-Comm    | 0.029808   | 0.029808   | 0.029808   |   0.0 |  0.69
-Output  | 4.0732     | 4.0732     | 4.0732     |   0.0 | 94.65
-Modify  | 0.10149    | 0.10149    | 0.10149    |   0.0 |  2.36
-Other   |            | 0.06505    |            |       |  1.51
+Pair    | 6.026      | 6.026      | 6.026      |   0.0 |  9.45
+Bond    | 0.061076   | 0.061076   | 0.061076   |   0.0 |  0.10
+Neigh   | 0.11221    | 0.11221    | 0.11221    |   0.0 |  0.18
+Comm    | 0.036856   | 0.036856   | 0.036856   |   0.0 |  0.06
+Output  | 56.32      | 56.32      | 56.32      |   0.0 | 88.37
+Modify  | 1.0571     | 1.0571     | 1.0571     |   0.0 |  1.66
+Other   |            | 0.1216     |            |       |  0.19
 
-Nlocal:             80 ave          80 max          80 min
+Nlocal:           1200 ave        1200 max        1200 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 Nghost:              0 ave           0 max           0 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Neighs:              0 ave           0 max           0 min
+Neighs:          78451 ave       78451 max       78451 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 
-Total # of neighbors = 0
-Ave neighs/atom = 0
-Ave special neighs/atom = 5.775
-Neighbor list builds = 12
+Total # of neighbors = 78451
+Ave neighs/atom = 65.375833
+Ave special neighs/atom = 0.985
+Neighbor list builds = 25
 Dangerous builds = 0
+
+
+
 
 run 1
+Generated 0 of 6 mixed pair_coeff terms from geometric mixing rule
 WARNING: Angles are defined but no angle style is set (src/src/force.cpp:198)
 WARNING: Likewise 1-3 special neighbor interactions != 1.0 (src/src/force.cpp:200)
-Per MPI rank memory allocation (min/avg/max) = 6.934 | 6.934 | 6.934 Mbytes
+WARNING: Communication cutoff 7e-07 is shorter than a bond length based estimate of 8e-07. This may lead to errors. (src/src/comm.cpp:723)
+Per MPI rank memory allocation (min/avg/max) = 8.754 | 8.754 | 8.754 Mbytes
    Step          Temp          E_pair         E_mol          TotEng         Press     
-     10000   7.0658598e+13  0              2.4331591e-19  1.1560246e-07  9633538.7    
-     10001   7.8592616e+13  0              2.082395e-19   1.2858308e-07  10715257     
-Loop time of 0.000456705 on 1 procs for 1 steps with 80 atoms
+     10000   6.2730683e+13 -5.7131304e-55  4.1660186e-19  1.5576654e-06  1.2980545e+08
+     10001   6.2576259e+13 -1.072109e-54   3.740606e-19   1.5538309e-06  1.2948591e+08
+Loop time of 0.00642876 on 1 procs for 1 steps with 1200 atoms
 
-88.2% CPU use with 1 MPI tasks x 1 OpenMP threads
+100.0% CPU use with 1 MPI tasks x 1 OpenMP threads
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
 ---------------------------------------------------------------
-Pair    | 0          | 0          | 0          |   0.0 |  0.00
-Bond    | 4.473e-06  | 4.473e-06  | 4.473e-06  |   0.0 |  0.98
+Pair    | 0.00059176 | 0.00059176 | 0.00059176 |   0.0 |  9.20
+Bond    | 9.094e-06  | 9.094e-06  | 9.094e-06  |   0.0 |  0.14
 Neigh   | 0          | 0          | 0          |   0.0 |  0.00
-Comm    | 3.126e-06  | 3.126e-06  | 3.126e-06  |   0.0 |  0.68
-Output  | 0.00042583 | 0.00042583 | 0.00042583 |   0.0 | 93.24
-Modify  | 1.1738e-05 | 1.1738e-05 | 1.1738e-05 |   0.0 |  2.57
-Other   |            | 1.154e-05  |            |       |  2.53
+Comm    | 3.174e-06  | 3.174e-06  | 3.174e-06  |   0.0 |  0.05
+Output  | 0.0056863  | 0.0056863  | 0.0056863  |   0.0 | 88.45
+Modify  | 0.00011972 | 0.00011972 | 0.00011972 |   0.0 |  1.86
+Other   |            | 1.877e-05  |            |       |  0.29
 
-Nlocal:             80 ave          80 max          80 min
+Nlocal:           1200 ave        1200 max        1200 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 Nghost:              0 ave           0 max           0 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Neighs:              0 ave           0 max           0 min
+Neighs:          77850 ave       77850 max       77850 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 
-Total # of neighbors = 0
-Ave neighs/atom = 0
-Ave special neighs/atom = 5.775
+Total # of neighbors = 77850
+Ave neighs/atom = 64.875
+Ave special neighs/atom = 0.985
 Neighbor list builds = 0
 Dangerous builds = 0
-Total wall time: 0:00:04
+Total wall time: 0:01:03
