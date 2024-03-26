@@ -4,15 +4,14 @@ import matplotlib.pyplot as plt
 # Define parameters
 num_points = 1000
 r = np.linspace(1e-15, 1e-6, num_points)
-sigma=250.0e-9
-R0=500.0e-9
+sigma=200.0e-9
+R0=200.0e-9
 kbt = 4.2800119e-21
 eps0=0.0 #Null-Interaction
-eps1=0.0*kbt #Nuc-Nuc/NucAc-NucAc/Nuc-NucAc
-eps2=-100.0*kbt #BRD4-Nuc
-eps3=100.0*kbt #pBRD4-pBRD4
-eps4=-10.0*kbt #pBRD4-Nuc
-
+eps1=10.0*kbt #AA/BB/AB
+eps2=-40.0*kbt #BC
+eps3=-100.0*kbt #DD
+eps4=-10.0*kbt #BD
 
 def U(r,sigma,eps,R0=1.0):
     low = R0 - sigma

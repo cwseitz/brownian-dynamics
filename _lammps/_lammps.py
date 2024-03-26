@@ -113,29 +113,29 @@ class Binders:
             file.writelines(lines) 
     def run(self):
         config = self.config
-        for n in range(config['nreps']):
-            with open(self.file, 'r') as f:
-                mod = f.read() 
-                T = config['T']
-                mod = mod.replace("TEMPERATURE", str(config['T']))
-                mod = mod.replace("CUTOFF", str(config['cutoff']))
-                mod = mod.replace("SIGMA", str(config['sigma']))
-                mod = mod.replace("NEIGHBOR", str(config['neighbor']) )
-                mod = mod.replace("GAMMA", str(config['gamma']))
-                mod = mod.replace("TIMESTEP", str(config['timestep']))
-                mod = mod.replace("NSTEPS", str(config['nsteps']))
-                mod = mod.replace("KAPPA", str(config['kappa']))
-                mod = mod.replace("EVERY", str(config['dump_every']))
-                dump_name = config['savepath']+f'dump_{T}-{n}.DNA'
-                sdump_name = config['savepath']+f'dump_scaled_{T}-{n}.DNA'
-                mod = mod.replace("DUMPNAME", dump_name)
-                mod = mod.replace("SCALED_WRAPPED", sdump_name)
-                temp = 'temp.lam'
-                with open(temp, 'w') as file:
-                    file.write(mod)
-                lmp = IPyLammps()
-                lmp.file(temp); lmp.run(1)
-                lmp.close(); os.remove(temp)
-                self.scale(sdump_name)                
+        for T in self.config['T']:
+            for n in range(config['nreps']):
+                with open(self.file, 'r') as f:
+                    mod = f.read() 
+                    mod = mod.replace("TEMPERATURE", str(T))
+                    mod = mod.replace("CUTOFF", str(config['cutoff']))
+                    mod = mod.replace("SIGMA", str(config['sigma']))
+                    mod = mod.replace("NEIGHBOR", str(config['neighbor']) )
+                    mod = mod.replace("GAMMA", str(config['gamma']))
+                    mod = mod.replace("TIMESTEP", str(config['timestep']))
+                    mod = mod.replace("NSTEPS", str(config['nsteps']))
+                    mod = mod.replace("KAPPA", str(config['kappa']))
+                    mod = mod.replace("EVERY", str(config['dump_every']))
+                    dump_name = config['savepath']+f'dump_{T}-{n}.DNA'
+                    sdump_name = config['savepath']+f'dump_scaled_{T}-{n}.DNA'
+                    mod = mod.replace("DUMPNAME", dump_name)
+                    mod = mod.replace("SCALED_WRAPPED", sdump_name)
+                    temp = 'temp.lam'
+                    with open(temp, 'w') as file:
+                        file.write(mod)
+                    lmp = IPyLammps()
+                    lmp.file(temp); lmp.run(1)
+                    lmp.close(); os.remove(temp)
+                    self.scale(sdump_name)                
 
 

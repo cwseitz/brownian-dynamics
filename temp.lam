@@ -7,19 +7,19 @@ atom_style angle
 
 variable        kb equal 1.38e-23
 variable        T0 equal 310
-variable        T equal TEMPERATURE
-variable        sigma equal SIGMA
-variable        cutoff equal CUTOFF
-variable        K equal KAPPA*${kb}*${T0}/${sigma}^2
+variable        T equal 310
+variable        sigma equal 2e-07
+variable        cutoff equal 5e-07
+variable        K equal 90.0*${kb}*${T0}/${sigma}^2
 
 boundary p p p
-neighbor NEIGHBOR bin 
+neighbor 5e-07 bin 
 neigh_modify every 1 delay 1 check yes 
 read_data _lammps/initialize/init_binders.txt 
 reset_timestep 0 
 group all type 1 2 3 4
-dump dump1 all custom EVERY DUMPNAME id type xu yu zu
-dump dump2 all custom EVERY SCALED_WRAPPED id type xsu ysu zsu
+dump dump1 all custom 1 /research3/shared/cwseitz/Data/MD/0_500/dump_310-4.DNA id type xu yu zu
+dump dump2 all custom 1 /research3/shared/cwseitz/Data/MD/0_500/dump_scaled_310-4.DNA id type xsu ysu zsu
 
 #Harmonic bonds
 bond_style   harmonic 
@@ -39,10 +39,10 @@ pair_coeff 3 4 _lammps/potentials/gauss.table GAUSS0 ${cutoff}
 pair_coeff 4 4 _lammps/potentials/gauss.table GAUSS3 ${cutoff}
 
 variable seed equal 54654651
-fix 1 all brownian   ${T} ${seed} gamma_t GAMMA
-timestep TIMESTEP
+fix 1 all brownian   ${T} ${seed} gamma_t 1e-06
+timestep 0.0001
 
-run NSTEPS
+run 10000
 
 
 
