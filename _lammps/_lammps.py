@@ -136,6 +136,6 @@ class Binders:
                     lmp = IPyLammps()
                     lmp.file(temp); lmp.run(1)
                     lmp.close(); os.remove(temp)
-                    self.scale(sdump_name)                
+                    #self.scale(sdump_name)                
 
 

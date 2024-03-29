@@ -1,4 +1,4 @@
-LAMMPS (2 Aug 2023 - Update 2)
+LAMMPS (2 Aug 2023 - Update 3)
 OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/src/comm.cpp:98)
   using 1 OpenMP thread(s) per MPI task
 ###############################################
@@ -10,7 +10,7 @@ atom_style angle
 
 variable        kb equal 1.38e-23
 variable        T0 equal 310
-variable        T equal 310
+variable        T equal 320
 variable        sigma equal 2e-07
 variable        cutoff equal 5e-07
 variable        K equal 90.0*${kb}*${T0}/${sigma}^2
@@ -43,12 +43,12 @@ Finding 1-2 1-3 1-4 neighbors ...
      4 = max # of 1-4 neighbors
      6 = max # of special neighbors
   special bonds CPU = 0.000 seconds
-  read_data CPU = 0.009 seconds
+  read_data CPU = 0.007 seconds
 reset_timestep 0
 group all type 1 2 3 4
 700 atoms in group all
-dump dump1 all custom 1 /research3/shared/cwseitz/Data/MD/0_500/dump_310-4.DNA id type xu yu zu
-dump dump2 all custom 1 /research3/shared/cwseitz/Data/MD/0_500/dump_scaled_310-4.DNA id type xsu ysu zsu
+dump dump1 all custom 1 /home/cwseitz/Desktop/MD/0_500/dump_320-2.DNA id type xu yu zu
+dump dump2 all custom 1 /home/cwseitz/Desktop/MD/0_500/dump_scaled_320-2.DNA id type xsu ysu zsu
 
 #Harmonic bonds
 bond_style   harmonic
@@ -89,4 +89,41 @@ WARNING:  Should only be flagged at inflection points (src/src/pair_table.cpp:46
 pair_coeff 2 4 _lammps/potentials/gauss.table GAUSS4 ${cutoff}
 pair_coeff 2 4 _lammps/potentials/gauss.table GAUSS4 5e-07
 WARNING: 1 of 1000 force values in table GAUSS4 are inconsistent with -dE/dr.
-WARNING:  Should only be flagged at inflecti
+WARNING:  Should only be flagged at inflection points (src/src/pair_table.cpp:466)
+pair_coeff 3 4 _lammps/potentials/gauss.table GAUSS0 ${cutoff}
+pair_coeff 3 4 _lammps/potentials/gauss.table GAUSS0 5e-07
+WARNING: 1 of 1000 force values in table GAUSS0 are inconsistent with -dE/dr.
+WARNING:  Should only be flagged at inflection points (src/src/pair_table.cpp:466)
+pair_coeff 4 4 _lammps/potentials/gauss.table GAUSS3 ${cutoff}
+pair_coeff 4 4 _lammps/potentials/gauss.table GAUSS3 5e-07
+WARNING: 1 of 1000 force values in table GAUSS3 are inconsistent with -dE/dr.
+WARNING:  Should only be flagged at inflection points (src/src/pair_table.cpp:466)
+
+variable seed equal 54654651
+fix 1 all brownian   ${T} ${seed} gamma_t 1e-06
+fix 1 all brownian   320 ${seed} gamma_t 1e-06
+fix 1 all brownian   320 54654651 gamma_t 1e-06
+timestep 0.0001
+
+run 10000
+Generated 0 of 6 mixed pair_coeff terms from geometric mixing rule
+WARNING: Angles are defined but no angle style is set (src/src/force.cpp:198)
+WARNING: Likewise 1-3 special neighbor interactions != 1.0 (src/src/force.cpp:200)
+Neighbor list info ...
+  update: every = 1 steps, delay = 1 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 1e-06
+  ghost atom cutoff = 1e-06
+  binsize = 5e-07, bins = 41 41 41
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair table, perpetual
+      attributes: half, newton on
+      pair build: half/bin/newton
+      stencil: half/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 5.623 | 5.623 | 5.623 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+         0   0             -5.5974369e-16  5.1691105e-17 -5.0805259e-16 -0.073999809  
+ERROR on proc 0: Error writing dump dump2: No space left on device (src/src/dump.cpp:540)
+Last command: run 10000
+Total wall time: 0:00:00

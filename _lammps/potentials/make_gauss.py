@@ -11,7 +11,7 @@ eps0=0.0 #Null-Interaction
 eps1=10.0*kbt #AA/BB/AB
 eps2=-40.0*kbt #BC
 eps3=-100.0*kbt #DD
-eps4=-10.0*kbt #BD
+eps4=-40.0*kbt #BD
 
 def U(r,sigma,eps,R0=1.0):
     low = R0 - sigma

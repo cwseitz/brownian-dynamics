@@ -7,7 +7,7 @@ atom_style angle
 
 variable        kb equal 1.38e-23
 variable        T0 equal 310
-variable        T equal 310
+variable        T equal 320
 variable        sigma equal 2e-07
 variable        cutoff equal 5e-07
 variable        K equal 90.0*${kb}*${T0}/${sigma}^2
@@ -18,8 +18,8 @@ neigh_modify every 1 delay 1 check yes
 read_data _lammps/initialize/init_binders.txt 
 reset_timestep 0 
 group all type 1 2 3 4
-dump dump1 all custom 1 /research3/shared/cwseitz/Data/MD/0_500/dump_310-4.DNA id type xu yu zu
-dump dump2 all custom 1 /research3/shared/cwseitz/Data/MD/0_500/dump_scaled_310-4.DNA id type xsu ysu zsu
+dump dump1 all custom 1 /home/cwseitz/Desktop/MD/0_500/dump_320-2.DNA id type xu yu zu
+dump dump2 all custom 1 /home/cwseitz/Desktop/MD/0_500/dump_scaled_320-2.DNA id type xsu ysu zsu
 
 #Harmonic bonds
 bond_style   harmonic 

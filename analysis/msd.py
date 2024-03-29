@@ -9,16 +9,16 @@ from utils import *
 with open('msd.json', 'r') as f:
     config = json.load(f)
     
-#imsd(config,types=[1,2])
+imsd(config,types=[1,2])
 #plot_imsd(config,multiplier=1e12)
 
 temps = [280,290,300,310,320]
 fig,ax=plt.subplots(figsize=(3,3))
-config['path'] = '/research3/shared/cwseitz/Data/MD/Free/'
+config['path'] = '/home/cwseitz/Desktop/MD/Free/'
 plot_D(config,ax,temps)
-config['path'] = '/research3/shared/cwseitz/Data/MD/500_0/'
+config['path'] = '/home/cwseitz/Desktop/MD/500_0/'
 plot_D(config,ax,temps,color='black',marker='^')
-config['path'] = '/research3/shared/cwseitz/Data/MD/0_500/'
+config['path'] = '/home/cwseitz/Desktop/MD/0_500/'
 plot_D(config,ax,temps,color='blue',marker='^')
 ax.set_xlabel('T (K)')
 ax.set_ylabel(r'$\gamma \langle D \rangle \; (\mu m^{2} /s^{2})$')

@@ -1,7 +1,7 @@
 {
-"savepath": "/research3/shared/cwseitz/Data/MD/0_500/",
-"nreps": 5,
-"T": [310],
+"savepath": "/home/cwseitz/Desktop/MD/0_500/",
+"nreps": 20,
+"T": [280,290,300,310,320],
 "num_c": 0,
 "num_d": 500,
 "p_acetyl": 0.3,
